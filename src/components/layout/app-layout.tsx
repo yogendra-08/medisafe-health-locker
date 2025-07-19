@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import {
   SidebarProvider,
   Sidebar,
@@ -115,11 +116,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarInset>
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-30">
                 <SidebarTrigger className="md:hidden" />
-                <div className="flex-1">
+                <div className="flex-1 flex items-center gap-4">
                     <h1 className="text-lg font-semibold">
                         {navItems.find(item => item.href === pathname)?.label || 'MediSafe'}
                     </h1>
+                    <span className="ml-4 text-base text-muted-foreground hidden md:inline">
+                        {user?.email ? `Welcome, ${user.email.split('@')[0]}!` : 'Welcome!'}
+                    </span>
                 </div>
+                {/* Dark mode toggle will be in the layout.tsx for global access */}
             </header>
             <main className="flex-1 p-4 md:p-6 lg:p-8">
                 {children}

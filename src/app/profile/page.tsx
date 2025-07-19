@@ -31,6 +31,9 @@ import type { HealthProfile } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import QRCode from 'qrcode.react';
+import { motion } from 'framer-motion';
+import { User as UserIcon, Droplet, AlertTriangle, Phone, UserCheck } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 // --- MOCK DATA ---
 const MOCK_PROFILE: HealthProfile = {
@@ -207,130 +210,132 @@ export default function ProfilePage() {
 
   return (
     <AppLayout>
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Health Profile</CardTitle>
-            <CardDescription>
-              Manage your personal and emergency health information.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="bloodGroup"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Blood Group</FormLabel>
-                      <FormControl><Input placeholder="e.g., O+" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormItem>
-                    <FormLabel>Allergies</FormLabel>
-                    <div className="flex gap-2">
-                        <Input 
-                            value={allergyInput} 
-                            onChange={e => setAllergyInput(e.target.value)} 
-                            placeholder="e.g., Peanuts"
-                            onKeyDown={e => { if(e.key === 'Enter') { e.preventDefault(); addAllergy(); }}}
-                        />
-                        <Button type="button" onClick={addAllergy}>Add</Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 pt-2">
-                        {allergies.map(allergy => (
-                             <Badge key={allergy} variant="secondary">
-                                {allergy}
-                                <button type="button" onClick={() => removeAllergy(allergy)} className="ml-1 rounded-full p-0.5 hover:bg-destructive/20">
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </Badge>
-                        ))}
-                    </div>
-                </FormItem>
-                <CardTitle className="text-lg pt-4">Emergency Contact</CardTitle>
-                 <FormField
-                  control={form.control}
-                  name="emergencyContactName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Name</FormLabel>
-                      <FormControl><Input placeholder="Jane Doe" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="emergencyContactPhone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Phone</FormLabel>
-                      <FormControl><Input type="tel" placeholder="+1 234 567 890" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Profile
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-        
-        <Card>
-            <CardHeader>
-                <CardTitle>Emergency QR Code</CardTitle>
-                <CardDescription>
-                    Generate a QR code that links to a public page with your essential health information for emergency situations.
-                </CardDescription>
+      <div className="grid gap-8 md:grid-cols-2 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="glassmorphism-card shadow-xl p-2">
+            <CardHeader className="flex flex-col items-center gap-2">
+              <Avatar className="h-16 w-16 mb-2">
+                <AvatarFallback className="text-2xl bg-primary text-white">
+                  {form.watch('fullName') ? form.watch('fullName').charAt(0).toUpperCase() : 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <UserIcon className="w-5 h-5 text-primary" /> Health Profile
+              </CardTitle>
+              <CardDescription className="text-center">
+                Manage your personal and emergency health information.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                    First responders can scan this code to quickly access your blood group, allergies, and emergency contact.
-                </p>
-                <Button onClick={() => setIsQrCodeOpen(true)} disabled={!user}>
-                    <QrCode className="mr-2 h-4 w-4" />
-                    Generate Emergency QR Code
-                </Button>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1"><UserCheck className="w-4 h-4 text-primary" /> Full Name</FormLabel>
+                        <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bloodGroup"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1"><Droplet className="w-4 h-4 text-red-500" /> Blood Group</FormLabel>
+                        <FormControl><Input placeholder="e.g., O+" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-yellow-500" /> Allergies</FormLabel>
+                    <div className="flex gap-2">
+                      <Input
+                        value={allergyInput}
+                        onChange={e => setAllergyInput(e.target.value)}
+                        placeholder="e.g., Peanuts"
+                        onKeyDown={e => { if(e.key === 'Enter') { e.preventDefault(); addAllergy(); }}}
+                      />
+                      <Button type="button" variant="outline" onClick={addAllergy} className="hover:scale-105 transition-transform">Add</Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {allergies.length > 0 ? allergies.map((allergy) => (
+                        <Badge key={allergy} className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full flex items-center gap-1 hover:scale-105 transition-transform">
+                          {allergy}
+                          <button type="button" onClick={() => removeAllergy(allergy)} className="ml-1 text-xs">✕</button>
+                        </Badge>
+                      )) : <span className="text-sm text-muted-foreground px-2">No allergies added.</span>}
+                    </div>
+                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="emergencyContactName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1"><Phone className="w-4 h-4 text-blue-500" /> Emergency Contact Name</FormLabel>
+                        <FormControl><Input placeholder="Jane Doe" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="emergencyContactPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1"><Phone className="w-4 h-4 text-blue-500" /> Emergency Contact Phone</FormLabel>
+                        <FormControl><Input placeholder="+1 234 567 890" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" size="lg" className="w-full font-semibold shadow-lg bg-gradient-to-r from-primary to-accent text-white hover:scale-105 transition-transform" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />} Save Profile
+                  </Button>
+                </form>
+              </Form>
             </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <Card className="shadow-xl p-2 border-4 border-gradient-to-br from-primary to-accent animate-glow">
+            <CardHeader className="flex flex-col items-center gap-2">
+              <QrCode className="w-10 h-10 text-primary mb-2 animate-pulse" />
+              <CardTitle className="text-lg font-semibold">Emergency QR Code</CardTitle>
+              <CardDescription className="text-center">Generate a QR code that links to a public page with your essential health information for emergency situations.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-4">
+              <Button size="lg" className="font-semibold shadow-md bg-gradient-to-r from-primary to-accent text-white hover:scale-105 transition-transform" onClick={() => setIsQrCodeOpen(true)}>
+                <QrCode className="w-5 h-5 mr-2" /> Generate Emergency QR Code
+              </Button>
+              <Dialog open={isQrCodeOpen} onOpenChange={setIsQrCodeOpen}>
+                <DialogContent className="flex flex-col items-center gap-4">
+                  <DialogHeader>
+                    <DialogTitle>Emergency QR Code</DialogTitle>
+                    <DialogDescription>Scan this code to quickly access your blood group, allergies, and emergency contact.</DialogDescription>
+                  </DialogHeader>
+                  {emergencyUrl && (
+                    <QRCode value={emergencyUrl} size={180} fgColor="#2563eb" bgColor="#fff" level="H" includeMargin={true} />
+                  )}
+                  <Button variant="outline" onClick={() => setIsQrCodeOpen(false)}>Close</Button>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
-      <Dialog open={isQrCodeOpen} onOpenChange={setIsQrCodeOpen}>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Your Emergency QR Code</DialogTitle>
-                <DialogDescription>
-                    Save or print this QR code and keep it in your wallet or on your phone lock screen.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col items-center gap-4 py-4">
-                <div className="bg-white p-4 rounded-lg border">
-                    <QRCode value={emergencyUrl} size={256} />
-                </div>
-                <a href={emergencyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">
-                    {emergencyUrl}
-                </a>
-            </div>
-        </DialogContent>
-      </Dialog>
     </AppLayout>
   );
 }

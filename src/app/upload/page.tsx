@@ -39,6 +39,7 @@ import Tesseract from 'tesseract.js';
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 const formSchema = z.object({
@@ -85,6 +86,18 @@ export default function UploadPage() {
       setOcrProgress(0);
       setHealthInsights([]);
     }
+  };
+
+  // Drag-and-drop handler
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      handleFileChange({ target: { files: [file] } } as any);
+    }
+  };
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
   };
 
   const processDocument = async () => {
@@ -230,165 +243,165 @@ export default function UploadPage() {
 
   return (
     <AppLayout>
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Add a New Document</CardTitle>
-          <CardDescription>
-            Upload a document image to automatically extract text, generate a summary, and suggest tags.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-               <FormField
+      <motion.div
+        className="max-w-2xl mx-auto mt-8"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="glassmorphism-card shadow-xl p-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UploadCloud className="w-6 h-6 text-primary animate-bounce" />
+              Add a New Document
+            </CardTitle>
+            <CardDescription>
+              Upload a document image to automatically extract text, generate a summary, and suggest tags.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
                   control={form.control}
                   name="file"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Document File</FormLabel>
                       <FormControl>
-                        <div className="flex items-center justify-center w-full">
-                            <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted border-border">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                    <p className="mb-2 text-sm text-muted-foreground">
-                                      {fileToProcess ? `Selected: ${fileToProcess.name}` : <><span className="font-semibold">Click to upload</span> or drag and drop</>}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">PNG, JPG, PDF, or other image files</p>
-                                </div>
-                                <Input 
-                                  id="dropzone-file" 
-                                  type="file" 
-                                  className="hidden"
-                                  accept="image/*,.pdf"
-                                  disabled={isSaving || isProcessing}
-                                  onChange={handleFileChange}
-                                />
-                            </label>
-                        </div>
+                        <motion.div
+                          className="flex flex-col items-center justify-center w-full border-2 border-dashed border-primary/40 rounded-xl p-8 bg-white/60 dark:bg-zinc-900/60 transition-all cursor-pointer hover:shadow-lg hover:bg-primary/10 mb-4"
+                          onDrop={handleDrop}
+                          onDragOver={handleDragOver}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          {fileToProcess ? (
+                            <div className="flex flex-col items-center gap-2">
+                              {fileToProcess.type.startsWith('image/') ? (
+                                <img src={URL.createObjectURL(fileToProcess)} alt="Preview" className="w-24 h-24 object-contain rounded-lg shadow" />
+                              ) : (
+                                <UploadCloud className="w-16 h-16 text-primary" />
+                              )}
+                              <span className="text-sm mt-2">{fileToProcess.name}</span>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => setFileToProcess(null)} className="mt-1 text-xs">Remove</Button>
+                            </div>
+                          ) : (
+                            <>
+                              <UploadCloud className="w-16 h-16 text-primary mb-2 animate-bounce" />
+                              <span className="text-base font-medium text-primary">Click to upload or drag and drop</span>
+                              <span className="text-xs text-muted-foreground">PNG, JPG, PDF, or other image files</span>
+                              <input type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileChange} ref={field.ref} />
+                            </>
+                          )}
+                        </motion.div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <Button type="button" onClick={processDocument} disabled={isProcessing || !fileToProcess || isSaving}>
-                  {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                  {isProcessing ? 'Analyzing Document...' : 'Analyze with AI'}
-                </Button>
-
-                {isProcessing && ocrProgress < 100 && (
-                  <div className="space-y-2">
-                    <Label>Processing...</Label>
-                    <Progress value={ocrProgress} className="w-full" />
-                    <p className="text-sm text-muted-foreground">Extracting text from the document, this may take a moment.</p>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="w-full gap-2 font-semibold shadow-md bg-gradient-to-r from-primary to-accent text-white hover:scale-105 transition-transform"
+                    onClick={processDocument}
+                    disabled={isProcessing || !fileToProcess}
+                  >
+                    <Sparkles className="w-5 h-5 animate-pulse" /> Analyze with AI
+                  </Button>
+                </motion.div>
+                {isProcessing && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
+                    <Progress value={ocrProgress} className="h-2 rounded-full" />
+                    <div className="text-xs text-muted-foreground mt-2">Analyzing document... ({Math.round(ocrProgress)}%)</div>
+                  </motion.div>
+                )}
+                <FormField
+                  control={form.control}
+                  name="fileName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Document Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., Blood Test Results" className="rounded-lg" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div>
+                  <Label>Your Tags</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <AnimatePresence>
+                      {suggestedTags.map(tag => (
+                        <motion.button
+                          key={tag}
+                          type="button"
+                          onClick={() => addTag(tag)}
+                          className="px-3 py-1 rounded-full bg-accent/80 text-xs font-medium text-primary shadow hover:scale-105 transition-transform"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                        >
+                          + {tag}
+                        </motion.button>
+                      ))}
+                    </AnimatePresence>
                   </div>
-                )}
-                
-                {form.watch("summary") && (
-                   <FormField
-                    control={form.control}
-                    name="summary"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>AI-Generated Summary</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            rows={4}
-                            {...field}
-                            disabled={isSaving || isProcessing}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              
-                {suggestedTags.length > 0 && (
-                  <div className="space-y-2">
-                      <FormLabel className="text-sm">Suggested Tags (Click to add)</FormLabel>
-                      <div className="flex flex-wrap gap-2">
-                          {suggestedTags.map((tag) => (
-                              <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-accent" onClick={() => addTag(tag)}>{tag}</Badge>
-                          ))}
-                      </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <AnimatePresence>
+                      {tags.map(tag => (
+                        <motion.div
+                          key={tag}
+                          className="flex items-center gap-1 px-3 py-1 rounded-full bg-primary text-xs font-medium text-white shadow hover:scale-105 transition-transform"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                        >
+                          {tag}
+                          <button type="button" onClick={() => removeTag(tag)} className="ml-1 text-xs">✕</button>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
-                )}
-
-                {healthInsights.length > 0 && (
-                  <div className="space-y-4">
-                    <FormLabel>AI Health Insights</FormLabel>
-                     <Alert variant="destructive">
-                        <AlertTitle>Disclaimer</AlertTitle>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="summary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Summary</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} placeholder="AI-generated summary will appear here..." className="rounded-lg min-h-[60px]" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <AnimatePresence>
+                  {healthInsights.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="mt-4">
+                      <Alert className="bg-accent/30 border-accent/60">
+                        <AlertTitle className="flex items-center gap-2"><Beaker className="w-5 h-5 text-primary" /> Health Insights</AlertTitle>
                         <AlertDescription>
-                            This is not medical advice. These insights are for informational purposes only. Always consult a qualified healthcare professional for any health concerns.
+                          <ul className="list-disc ml-6 mt-2 space-y-1">
+                            {healthInsights.map((insight, i) => (
+                              <li key={i}>{insight}</li>
+                            ))}
+                          </ul>
                         </AlertDescription>
-                    </Alert>
-                    <div className="space-y-3">
-                        {healthInsights.map((insight, index) => (
-                            <Card key={index} className="bg-muted/50">
-                                <CardContent className="p-4">
-                                    <div className="flex items-start gap-4">
-                                        <div className="pt-1">
-                                            <Beaker className="h-5 w-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-sm">{insight.term}</p>
-                                            <p className="text-sm text-muted-foreground">{insight.observation}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                  </div>
-                )}
-
-
-              <FormField
-                control={form.control}
-                name="fileName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Document Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Blood Test Results"
-                        {...field}
-                        disabled={isSaving}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormItem>
-                <FormLabel>Your Tags</FormLabel>
-                 <div className="flex flex-wrap gap-2 min-h-[2.5rem] bg-background p-2 rounded-md border border-input">
-                    {tags.length > 0 ? tags.map((tag) => (
-                        <Badge key={tag} variant="secondary">
-                            {tag}
-                            <button type="button" onClick={() => removeTag(tag)} className="ml-1 rounded-full p-0.5 hover:bg-destructive/20">
-                                <X className="h-3 w-3" />
-                            </button>
-                        </Badge>
-                    )) : <span className="text-sm text-muted-foreground px-2">Add tags from the suggestions above.</span>}
-                 </div>
-                 <FormDescription>
-                    Add relevant tags to categorize your document.
-                 </FormDescription>
-              </FormItem>
-
-              <Button type="submit" className="w-full" disabled={isSaving || isProcessing}>
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {isSaving ? `Saving...` : "Save Document"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                      </Alert>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <Button type="submit" size="lg" className="w-full font-semibold shadow-lg mt-4 bg-gradient-to-r from-primary to-accent text-white hover:scale-105 transition-transform" disabled={isSaving}>
+                  {isSaving && <Loader2 className="mr-2 h-5 w-5 animate-spin" />} Save Document
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </motion.div>
     </AppLayout>
   );
 }

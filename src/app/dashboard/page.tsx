@@ -53,6 +53,9 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import Link from 'next/link';
 import { ShareDocumentDialog } from "@/components/share-document-dialog";
+import { motion, AnimatePresence } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PlusCircle } from 'lucide-react';
 
 // --- MOCK DATA ---
 const MOCK_DOCUMENTS: MedicalDocument[] = [
@@ -118,9 +121,11 @@ function DeleteConfirmationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} disabled={isDeleting}>
-            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Continue
+          <AlertDialogAction asChild disabled={isDeleting}>
+            <button onClick={onConfirm} disabled={isDeleting} className="flex items-center">
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Continue
+            </button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -232,94 +237,91 @@ export default function DashboardPage() {
     }
   }, [documentToDelete, toast, user]);
 
+  // Quick stats
+  const totalDocs = documents.length;
+  const lastUploaded = documents.length > 0 ? format(documents[0].uploadedAt.toDate(), 'PPP') : '--';
+
   return (
     <AppLayout>
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold">My Documents</h1>
-        <div className="rounded-lg border shadow-sm">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>File Name</TableHead>
-                <TableHead className="hidden sm:table-cell">Tags</TableHead>
-                <TableHead className="hidden md:table-cell">Added At</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-                  </TableCell>
-                </TableRow>
-              ) : documents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    <FileText className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                    No documents found.
-                    <Button variant="link" asChild><Link href="/upload">Add one now</Link></Button>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                documents.map((doc) => (
-                  <TableRow key={doc.id}>
-                    <TableCell className="font-medium">{doc.fileName}</TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <div className="flex flex-wrap gap-1">
-                        {doc.tags.map((tag, i) => (
-                          <Badge key={i} variant="secondary">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {doc.uploadedAt ? format(doc.uploadedAt.toDate(), "PPpp") : 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setDocumentToShare(doc)}>
-                              <Share2 className="mr-2 h-4 w-4" /> Share
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setDocumentToDelete(doc)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <h1 className="text-2xl font-bold">My Documents</h1>
+          <div className="flex gap-4">
+            <div className="bg-white/80 dark:bg-zinc-900/80 shadow card px-6 py-3 rounded-xl flex flex-col items-center min-w-[120px]">
+              <span className="text-xs text-muted-foreground">Total</span>
+              <span className="text-xl font-semibold text-primary transition-all animate-pulse">{totalDocs}</span>
+            </div>
+            <div className="bg-white/80 dark:bg-zinc-900/80 shadow card px-6 py-3 rounded-xl flex flex-col items-center min-w-[120px]">
+              <span className="text-xs text-muted-foreground">Last Uploaded</span>
+              <span className="text-base font-medium">{lastUploaded}</span>
+            </div>
+          </div>
         </div>
-      </div>
-      <DeleteConfirmationDialog 
-        isOpen={!!documentToDelete} 
-        onClose={() => setDocumentToDelete(null)}
-        onConfirm={handleDelete}
-        isDeleting={isDeleting}
-      />
-      {documentToShare && (
-        <ShareDocumentDialog 
-            isOpen={!!documentToShare}
-            onClose={() => setDocumentToShare(null)}
-            document={documentToShare}
+        {/* Loading state */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-40 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <FileText className="w-16 h-16 text-primary mb-4 animate-bounce" />
+            <p className="text-lg font-medium mb-2">No documents found.</p>
+            <Link href="/upload">
+              <Button size="lg" className="gap-2 text-base font-semibold shadow-lg">
+                <PlusCircle className="w-5 h-5" /> Add Document
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            <AnimatePresence>
+              {documents.map((doc, i) => (
+                <motion.div
+                  key={doc.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                  className="bg-white/90 dark:bg-zinc-900/90 card shadow p-5 rounded-xl flex flex-col gap-3 hover:scale-[1.03] hover:shadow-xl transition-transform cursor-pointer border border-border relative group"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <span className="font-semibold text-base truncate flex-1" title={doc.fileName}>{doc.fileName}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-1">
+                    {doc.tags.map(tag => (
+                      <Badge key={tag} className="bg-accent/60 text-xs px-2 py-0.5 rounded-full">{tag}</Badge>
+                    ))}
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">Added: {format(doc.uploadedAt.toDate(), 'PPP')}</div>
+                  <div className="text-sm text-muted-foreground line-clamp-2 mb-2">{doc.summary}</div>
+                  <div className="flex gap-2 mt-auto">
+                    <Button size="sm" variant="outline" onClick={() => setDocumentToShare(doc)}>
+                      <Share2 className="w-4 h-4 mr-1" /> Share
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => setDocumentToDelete(doc)}>
+                      <Trash2 className="w-4 h-4 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+        <DeleteConfirmationDialog
+          isOpen={!!documentToDelete}
+          onClose={() => setDocumentToDelete(null)}
+          onConfirm={handleDelete}
+          isDeleting={isDeleting}
         />
-      )}
+        <ShareDocumentDialog
+          open={!!documentToShare}
+          onOpenChange={() => setDocumentToShare(null)}
+          document={documentToShare}
+        />
+      </div>
     </AppLayout>
   );
 }
