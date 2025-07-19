@@ -44,10 +44,6 @@ export default function LoginPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: 'test@example.com',
-      password: 'password',
-    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -91,7 +87,7 @@ export default function LoginPage() {
             </div>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Login with the demo credentials below.
+            Please login to your account.
           </CardDescription>
         </CardHeader>
         <CardContent>
