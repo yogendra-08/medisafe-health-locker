@@ -41,7 +41,7 @@ import { Separator } from "../ui/separator";
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/upload", icon: Upload, label: "Upload" },
-  { href: "/assistant", icon: Bot, label: "AI Assistant" },
+  // { href: "/assistant", icon: Bot, label: "AI Assistant" },
   { href: "/profile", icon: UserIcon, label: "Health Profile" },
 ];
 

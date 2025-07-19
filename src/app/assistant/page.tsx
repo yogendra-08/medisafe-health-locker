@@ -1,5 +1,6 @@
 
 // src/app/assistant/page.tsx
+// Entire page commented out for now
 'use client';
 
 import React,
