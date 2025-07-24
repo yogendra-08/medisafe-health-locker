@@ -19,8 +19,7 @@ MediSafe is a modern, secure, and intelligent web application designed to help y
 - **UI Library:** [React](https://react.dev/) & [TypeScript](https://www.typescriptlang.org/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [ShadCN UI](https://ui.shadcn.com/)
 - **AI Integration:** [Genkit](https://firebase.google.com/docs/genkit) with [Google AI (Gemini)](https://ai.google.dev/)
-- **Backend & Database:** [Firebase](https://firebase.google.com/) (Authentication, Firestore)
-- **File Storage:** [Supabase](https://supabase.com/) (for PDFs and images)
+- **Backend & Database:** [Firebase](https://firebase.google.com/) (Authentication, Firestore, Storage)
 - **Deployment:** Ready for [Firebase App Hosting](https://firebase.google.com/docs/app-hosting)
 
 ## 🚀 Getting Started
@@ -28,8 +27,7 @@ MediSafe is a modern, secure, and intelligent web application designed to help y
 ### 1. Prerequisites
 
 - Node.js (v18 or later)
-- An active Firebase project
-- A Supabase account (for file storage)
+- An active Firebase project.
 
 ### 2. Firebase Setup
 
@@ -50,16 +48,7 @@ This project requires Firebase for authentication, database, and Genkit AI funct
     NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
     ```
 
-### 3. Supabase Setup (File Storage)
-
-1.  Follow the detailed setup guide in [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md)
-2.  Add your Supabase credentials to `.env.local`:
-    ```env
-    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
-
-### 4. Genkit Setup (Google AI)
+### 3. Genkit Setup (Google AI)
 
 1.  In the Google AI Studio, get a Gemini API key.
 2.  Add the key to your `.env.local` file:
@@ -67,7 +56,7 @@ This project requires Firebase for authentication, database, and Genkit AI funct
     GEMINI_API_KEY=your_gemini_api_key
     ```
     
-### 5. Installation and Running the App
+### 4. Installation and Running the App
 
 1.  **Install dependencies:**
     ```bash
@@ -79,21 +68,3 @@ This project requires Firebase for authentication, database, and Genkit AI funct
     ```
 
 The application will now be running on `http://localhost:9002`.
-
----
-
-## ✅ Configuration & Integration Status
-
-- All configuration and integration steps for Firebase, Supabase, and Genkit are **complete**.
-- The app will self-validate configuration at runtime and show errors/warnings if anything is missing.
-- See `SUPABASE_SETUP.md` for detailed Supabase setup instructions.
-- See `env.example` for a sample environment variable file.
-
----
-
-## 👥 Team Members
-
-- Yogendra Bhange
-- Yash Dudhe
-- Prathmesh Saharkar
-- Gaurav Nikhade

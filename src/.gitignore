@@ -1,0 +1,57 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Vercel
+.vercel
+
+# Nuxt
+.nuxt
+dist
+
+# Remix
+.cache/
+build/
+public/build/
+
+# Docusaurus
+.docusaurus
+
+# Svelte
+.svelte-kit
+
+# Gatsby
+.cache/
+# These files are created by Gatsby when running gatsby develop or gatsby build.
+# They are managed by Gatsby and not meant to be edited.
+public
+
+# Lerna
+/packages/**/node_modules
+
+# Miscellaneous
+/.env.local
+/.env.development.local
+/.env.test.local
+/.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+
+# Tesseract.js
+/eng.traineddata.gz
