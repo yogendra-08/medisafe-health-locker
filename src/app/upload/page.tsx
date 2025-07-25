@@ -245,33 +245,31 @@ export default function UploadPage() {
     }
 
     try {
-      // Get user's auth token for RLS policies
-      const token = await user.getIdToken();
+      // Verify environment variables
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY;
       
-      // Set auth header for Supabase client
-      supabase.auth.setSession({
-        access_token: token,
-        refresh_token: '',
-        expires_in: 3600,
-        expires_at: Date.now() + 3600 * 1000,
-        token_type: 'bearer',
-        user: {
-          id: user.uid,
-          email: user.email || '',
-          user_metadata: {},
-          app_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      });
+      if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error("Supabase configuration missing. Please check your environment variables (URL and SERVICE_KEY).");
+      }
+      
+      console.log('User attempting upload:', { uid: user.uid, email: user.email });
+      
+      // Create a Supabase client with service role key for privileged access
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+      
+      console.log('Using Supabase service role for upload (bypasses RLS)');
+      
 
       // Generate unique filename with timestamp
       const timestamp = Date.now();
       const fileName = `${user.uid}/${timestamp}_${fileToProcess.name}`;
       
-      // 1. Upload file to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      console.log('Attempting file upload:', fileName);
+      
+      // 1. Upload file to Supabase Storage using service role
+      const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
         .from('uploads')
         .upload(fileName, fileToProcess, {
           cacheControl: '3600',
@@ -283,12 +281,9 @@ export default function UploadPage() {
         throw new Error(`File upload failed: ${uploadError.message}`);
       }
       
-      // Construct the correct file URL
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      if (!supabaseUrl) {
-        throw new Error("Supabase URL not configured. Please check your environment variables.");
-      }
+      console.log('File uploaded successfully:', uploadData);
       
+      // Construct the correct file URL
       const fileUrl = uploadData?.path 
         ? `${supabaseUrl}/storage/v1/object/public/uploads/${uploadData.path}`
         : `${supabaseUrl}/storage/v1/object/public/uploads/${fileName}`;
@@ -306,23 +301,31 @@ export default function UploadPage() {
       
       console.log('Attempting to insert document:', documentData);
       
-      const { data: insertData, error: insertError } = await supabase
+      const { data: insertData, error: insertError } = await supabaseAdmin
         .from('documents')
         .insert([documentData])
         .select();
-        
-      if (insertError) {
-        console.error("Database insert error:", insertError);
-        
-        // Provide more specific error messages
-        if (insertError.code === '42501') {
-          throw new Error("Database permission denied. Please check your account permissions.");
-        } else if (insertError.message.includes('row-level security')) {
-          throw new Error("Access denied. Please ensure you're properly authenticated and have permission to upload documents.");
-        } else {
-          throw new Error(`Database error: ${insertError.message}`);
-        }
+      
+    if (insertError) {
+      console.error("Database insert error:", insertError);
+      console.error("Error details:", {
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint
+      });
+      
+      // Provide more specific error messages
+      if (insertError.code === '42501') {
+        throw new Error("Database permission denied. Please check your account permissions.");
+      } else if (insertError.message.includes('row-level security') || insertError.message.includes('policy')) {
+        throw new Error("RLS Policy Error: Please disable Row Level Security on the documents table in Supabase or configure proper authentication. See console for details.");
+      } else if (insertError.code === '23505') {
+        throw new Error("Duplicate entry. This document may already exist.");
+      } else {
+        throw new Error(`Database error (${insertError.code}): ${insertError.message}`);
       }
+    }  
 
       console.log('Document saved successfully:', insertData);
       toast({ title: "Success!", description: "Your document has been uploaded and saved." });
