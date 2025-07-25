@@ -364,7 +364,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-*Made with ❤ by the Team Error*
+*Made with ❤ by the Team Error.*
 
 [![GitHub stars](https://img.shields.io/github/stars/your-username/medisafe?style=social)](https://github.com/your-username/medisafe)
 [![GitHub forks](https://img.shields.io/github/forks/your-username/medisafe?style=social)](https://github.com/your-username/medisafe)
