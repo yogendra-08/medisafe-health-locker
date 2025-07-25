@@ -22,6 +22,26 @@ A modern, secure, and intelligent web application designed to revolutionize pers
 
 **https://medisafe-locker.netlify.app/**
 
+🚧 **Note for Reviewers / Users:**
+
+This project uses free-tier services (Firebase & Supabase) for backend, storage, and authentication.
+
+If the app shows errors like:
+- "Session expired"
+- "Storage bucket not found"
+- "Permission denied"
+- or fails to load certain features
+
+👉 It may be due to resource limits being temporarily exceeded (storage, auth quota, or daily request limits).
+
+We’ve kept core features functional for demo/testing, but occasional downtime may occur due to these constraints.
+
+🔐 For a smooth experience:
+- Try again after some time
+- Or reach out for a fresh demo link or credentials
+
+Thank you for understanding! 🙏
+
 ---
 
 ## ✨ Key Features
