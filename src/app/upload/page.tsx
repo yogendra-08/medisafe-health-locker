@@ -73,10 +73,29 @@ export default function UploadPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/') && !file.type.startsWith('application/pdf')) {
-        toast({ title: "Invalid File Type", description: "Please upload an image or PDF file.", variant: "destructive" });
+      // Check file type and size
+      const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+      const validPdfType = 'application/pdf';
+      const maxSize = 10 * 1024 * 1024; // 10MB limit
+      
+      if (!validImageTypes.includes(file.type) && file.type !== validPdfType) {
+        toast({ 
+          title: "Invalid File Type", 
+          description: "Please upload an image (JPEG, PNG, GIF, BMP, WebP) or PDF file.", 
+          variant: "destructive" 
+        });
         return;
       }
+      
+      if (file.size > maxSize) {
+        toast({ 
+          title: "File Too Large", 
+          description: "Please upload a file smaller than 10MB.", 
+          variant: "destructive" 
+        });
+        return;
+      }
+      
       setFileToProcess(file);
       form.setValue('fileName', file.name);
       setExtractedText("");
@@ -97,42 +116,88 @@ export default function UploadPage() {
     setHealthInsights([]);
 
     try {
-      // Step 1: OCR with Tesseract.js
-      const { data: { text } } = await Tesseract.recognize(
-        fileToProcess,
-        'eng',
-        { 
-          logger: m => {
-            if (m.status === 'recognizing text') {
-              setOcrProgress(m.progress * 100);
+      let text = "";
+      
+      // Handle different file types
+      if (fileToProcess.type === 'application/pdf') {
+        // For PDF files, we'll need to convert to image first or use a different approach
+        // For now, let's try direct OCR which Tesseract can handle for some PDFs
+        try {
+          const { data: { text: pdfText } } = await Tesseract.recognize(
+            fileToProcess,
+            'eng',
+            { 
+              logger: m => {
+                if (m.status === 'recognizing text') {
+                  setOcrProgress(m.progress * 100);
+                }
+              }
+            }
+          );
+          text = pdfText;
+        } catch (pdfError) {
+          console.warn("Direct PDF OCR failed, trying as image:", pdfError);
+          // If direct PDF OCR fails, we could implement PDF-to-image conversion here
+          throw new Error("PDF processing not fully supported yet. Please convert to image format.");
+        }
+      } else {
+        // Handle image files
+        const { data: { text: imageText } } = await Tesseract.recognize(
+          fileToProcess,
+          'eng',
+          { 
+            logger: m => {
+              if (m.status === 'recognizing text') {
+                setOcrProgress(m.progress * 100);
+              }
             }
           }
-        }
-      );
+        );
+        text = imageText;
+      }
+      
       setExtractedText(text);
       setOcrProgress(100);
 
-      if (!text) {
-        toast({ title: "OCR Failed", description: "Could not extract any text from the document. The image might be blurry or contain no text.", variant: "destructive" });
+      if (!text || text.trim().length < 10) {
+        toast({ 
+          title: "OCR Warning", 
+          description: "Very little text was extracted. The document might be blurry, contain no text, or be in an unsupported format.", 
+          variant: "destructive" 
+        });
         setIsProcessing(false);
         return;
       }
 
       // Step 2: AI Summary & Tagging + Health Analysis (run in parallel)
-      const [summaryResult, insightsResult] = await Promise.all([
-        summarizeAndTagDocument({ documentText: text }),
-        analyzeHealthReport({ documentText: text })
-      ]);
-      
-      setSuggestedTags(summaryResult.suggestedTags);
-      form.setValue("summary", summaryResult.summary);
-      setHealthInsights(insightsResult.findings);
-      
-      toast({ title: "Analysis Complete", description: "Review the summary, tags, and health insights." });
+      try {
+        const [summaryResult, insightsResult] = await Promise.all([
+          summarizeAndTagDocument({ documentText: text }),
+          analyzeHealthReport({ documentText: text })
+        ]);
+        
+        setSuggestedTags(summaryResult.suggestedTags || []);
+        form.setValue("summary", summaryResult.summary || "");
+        setHealthInsights(insightsResult.findings || []);
+        
+        toast({ title: "Analysis Complete", description: "Review the summary, tags, and health insights." });
+      } catch (aiError) {
+        console.warn("AI analysis failed, but OCR succeeded:", aiError);
+        toast({ 
+          title: "Partial Success", 
+          description: "Text was extracted successfully, but AI analysis failed. You can still save the document.", 
+          variant: "default" 
+        });
+      }
 
     } catch (error) {
       console.error("Document processing failed:", error);
-      toast({ title: "Processing failed.", description: "Could not analyze the document.", variant: "destructive" });
+      const errorMessage = error instanceof Error ? error.message : "Could not analyze the document.";
+      toast({ 
+        title: "Processing failed", 
+        description: errorMessage, 
+        variant: "destructive" 
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -163,6 +228,7 @@ export default function UploadPage() {
     }
     setIsSaving(true);
 
+    // Handle mock user for testing
     if (user.uid === 'test-user-id') {
       setTimeout(() => {
         toast({ title: "Success!", description: "Mock document record has been saved." });
@@ -179,39 +245,98 @@ export default function UploadPage() {
     }
 
     try {
+      // Get user's auth token for RLS policies
+      const token = await user.getIdToken();
+      
+      // Set auth header for Supabase client
+      supabase.auth.setSession({
+        access_token: token,
+        refresh_token: '',
+        expires_in: 3600,
+        expires_at: Date.now() + 3600 * 1000,
+        token_type: 'bearer',
+        user: {
+          id: user.uid,
+          email: user.email || '',
+          user_metadata: {},
+          app_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      });
+
+      // Generate unique filename with timestamp
+      const timestamp = Date.now();
+      const fileName = `${user.uid}/${timestamp}_${fileToProcess.name}`;
+      
       // 1. Upload file to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('uploads')
-        .upload(`${user.uid}/${Date.now()}_${fileToProcess.name}`, fileToProcess, {
+        .upload(fileName, fileToProcess, {
           cacheControl: '3600',
           upsert: false,
         });
+        
       if (uploadError) {
-        throw uploadError;
+        console.error("Storage upload error:", uploadError);
+        throw new Error(`File upload failed: ${uploadError.message}`);
       }
-      const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${user.uid}/${Date.now()}_${fileToProcess.name}`;
+      
+      // Construct the correct file URL
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (!supabaseUrl) {
+        throw new Error("Supabase URL not configured. Please check your environment variables.");
+      }
+      
+      const fileUrl = uploadData?.path 
+        ? `${supabaseUrl}/storage/v1/object/public/uploads/${uploadData.path}`
+        : `${supabaseUrl}/storage/v1/object/public/uploads/${fileName}`;
 
       // 2. Save metadata to Supabase (Postgres) table 'documents'
-      const { error: insertError } = await supabase.from('documents').insert([
-        {
-          user_id: user.uid,
-          file_name: values.fileName,
-          tags: tags,
-          summary: values.summary,
-          file_url: fileUrl,
-          file_content: extractedText,
-          uploaded_at: new Date().toISOString(),
-        },
-      ]);
+      const documentData = {
+        user_id: user.uid,
+        file_name: values.fileName || fileToProcess.name,
+        tags: tags || [],
+        summary: values.summary || '',
+        file_url: fileUrl,
+        file_content: extractedText || '',
+        uploaded_at: new Date().toISOString(),
+      };
+      
+      console.log('Attempting to insert document:', documentData);
+      
+      const { data: insertData, error: insertError } = await supabase
+        .from('documents')
+        .insert([documentData])
+        .select();
+        
       if (insertError) {
-        throw insertError;
+        console.error("Database insert error:", insertError);
+        
+        // Provide more specific error messages
+        if (insertError.code === '42501') {
+          throw new Error("Database permission denied. Please check your account permissions.");
+        } else if (insertError.message.includes('row-level security')) {
+          throw new Error("Access denied. Please ensure you're properly authenticated and have permission to upload documents.");
+        } else {
+          throw new Error(`Database error: ${insertError.message}`);
+        }
       }
 
+      console.log('Document saved successfully:', insertData);
       toast({ title: "Success!", description: "Your document has been uploaded and saved." });
       router.push("/dashboard");
+      
     } catch (error) {
-      console.error("Error uploading document to Supabase:", error);
-      toast({ title: "Error", description: "Failed to upload document.", variant: "destructive" });
+      console.error("Error uploading document:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload document. Please try again.";
+      toast({ 
+        title: "Upload Error", 
+        description: errorMessage, 
+        variant: "destructive" 
+      });
+    } finally {
       setIsSaving(false);
     }
   }
