@@ -1,4 +1,16 @@
 # 🏥 MediSafe - Your AI-Powered Health Record Locker
+<h1 align="center">🏆 SuPrathon 2K25 - National Winner 🏆</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Team%20Error-SuPrathon%202K25%20Winner-brightgreen?style=for-the-badge" alt="Hackathon Winner Badge"/>
+</p>
+
+<p align="center">
+  <strong>MediSafe Locker</strong> is the AI-powered health document vault that secured 1st place in <b>India’s biggest virtual hackathon - SuPrathon 2K25</b>. This project was recognized for its real-world impact, advanced tech stack, and innovation in healthcare document management.  
+</p>
+
+---
+
 
 <div align="center">
 
