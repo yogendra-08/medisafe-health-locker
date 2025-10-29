@@ -12,6 +12,7 @@
 ---
 
 
+
 <div align="center">
 
 
@@ -280,7 +281,7 @@ npm test
 
 ## 🚀 Deployment
 
-### Firebase App Hosting
+# Firebase App Hosting
 bash
 # Install Firebase CLI
 npm install -g firebase-tools
@@ -295,7 +296,7 @@ firebase init hosting
 firebase deploy
 
 
-### Vercel Deployment
+# Vercel Deployment
 bash
 # Install Vercel CLI
 npm install -g vercel
