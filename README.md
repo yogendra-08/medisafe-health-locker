@@ -9,6 +9,12 @@
   <strong>MediSafe Locker</strong> is the AI-powered health document vault that secured 1st place in <b>India’s biggest virtual hackathon - SuPrathon 2K25</b>. This project was recognized for its real-world impact, advanced tech stack, and innovation in healthcare document management.  
 </p>
 
+## 🏆 Hackathon Winners — Suparthon 2025
+
+We won **Suparthon 2025**! Proud moment for the Medisafe team.
+<p align="center">
+  <img src="https://github.com/yogendra-08/medisafe-health-locker/blob/main/winners.jpg?raw=true" alt="Medisafe - Suparthon Winners" width="700" height="500"/>
+</p>
 ---
 
 
@@ -131,9 +137,9 @@ Thank you for understanding! 🙏
 
 ---
 
-## 🚀 Getting Started
+# 🚀 Getting Started
 
-### 📋 Prerequisites
+# 📋 Prerequisites
 
 - *Node.js* (v18 or later) - [Download here](https://nodejs.org/)
 - *Git* - [Download here](https://git-scm.com/)
@@ -141,7 +147,7 @@ Thank you for understanding! 🙏
 - *Supabase Account* - [Sign up here](https://supabase.com/)
 - *Google AI Studio Account* - [Sign up here](https://ai.google.dev/)
 
-### 🔧 Installation Guide
+# 🔧 Installation Guide
 
 #### 1️⃣ *Clone the Repository*
 bash
@@ -149,30 +155,30 @@ git clone https://github.com/your-username/medisafe.git
 cd medisafe
 
 
-#### 2️⃣ *Install Dependencies*
+# 2️⃣ *Install Dependencies*
 bash
 npm install
 
 
-#### 3️⃣ *Firebase Setup*
+# 3️⃣ *Firebase Setup*
 1. Create a project on the [Firebase Console](https://console.firebase.google.com/)
 2. Enable *Authentication* (Email/Password provider)
 3. Enable *Firestore Database*
 4. Go to Project Settings → General → Your apps → Web app
 5. Copy your Firebase configuration
 
-#### 4️⃣ *Supabase Setup*
+# 4️⃣ *Supabase Setup*
 1. Create a project on the [Supabase Console](https://supabase.com/)
 2. Go to Storage → Create new bucket named documents
 3. Set bucket privacy to allow authenticated users
 4. Go to Settings → API → Copy project URL and anon key
 
-#### 5️⃣ *Google AI Setup*
+# 5️⃣ *Google AI Setup*
 1. Visit [Google AI Studio](https://ai.google.dev/)
 2. Get your Gemini API key
 3. Enable the Gemini API in your Google Cloud Console
 
-#### 6️⃣ *Environment Configuration*
+# 6️⃣ *Environment Configuration*
 Create a .env.local file in the root directory:
 
 env
@@ -264,54 +270,14 @@ medisafe/
 
 ---
 
-## 🧪 Testing
-
-bash
-# Run type checking
-npm run typecheck
-
-# Run linting
-npm run lint
-
-# Run tests (when implemented)
-npm test
-
 
 ---
 
-## 🚀 Deployment
-
-# Firebase App Hosting
-bash
-# Install Firebase CLI
-npm install -g firebase-tools
-
-# Login to Firebase
-firebase login
-
-# Initialize Firebase
-firebase init hosting
-
-# Deploy
-firebase deploy
-
-
-# Vercel Deployment
-bash
-# Install Vercel CLI
-npm install -g vercel
-
-# Deploy
-vercel
-
-
----
-
-## 🤝 Contributing
+# 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-### Development Workflow
+# Development Workflow
 1. Fork the repository
 2. Create a feature branch (git checkout -b feature/amazing-feature)
 3. Commit your changes (git commit -m 'Add amazing feature')
@@ -373,3 +339,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [![GitHub license](https://img.shields.io/github/license/your-username/medisafe)](https://github.com/your-username/medisafe/blob/main/LICENSE)
 
 </div>
+
+
+
