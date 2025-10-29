@@ -9,12 +9,6 @@
   <strong>MediSafe Locker</strong> is the AI-powered health document vault that secured 1st place in <b>India’s biggest virtual hackathon - SuPrathon 2K25</b>. This project was recognized for its real-world impact, advanced tech stack, and innovation in healthcare document management.  
 </p>
 
-## 🏆 Hackathon Winners — Suparthon 2025
-
-We won **Suparthon 2025**! Proud moment for the Medisafe team.
-<p align="center">
-  <img src="https://github.com/yogendra-08/medisafe-health-locker/blob/main/winners.jpg?raw=true" alt="Medisafe - Suparthon Winners" width="700" height="500"/>
-</p>
 ---
 
 
@@ -34,6 +28,13 @@ We won **Suparthon 2025**! Proud moment for the Medisafe team.
 A modern, secure, and intelligent web application designed to revolutionize personal medical record management with cutting-edge AI technology.
 
 </div>
+
+## 🏆 Hackathon Winners — Suparthon 2025
+
+We won **Suparthon 2025**! Proud moment for the Medisafe team.
+<p align="center">
+  <img src="https://github.com/yogendra-08/medisafe-health-locker/blob/main/winners.jpg?raw=true" alt="Medisafe - Suparthon Winners" width="700" height="500"/>
+</p>
 
 ---
 
